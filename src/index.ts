@@ -1,15 +1,19 @@
-import * as container from './container.ts';
-import * as db from './db.ts';
-import { setEnvironmentVariables } from './set-environment-variables.ts';
+import { join } from 'node:path';
+import type { Plugin } from 'vite';
+import type { ViteUserConfig } from 'vitest/config.js';
 
-setEnvironmentVariables();
+const __dirname = new URL('.', import.meta.url).pathname;
 
-export async function setup() {
-  await container.start();
-  await db.start();
-}
-
-export async function teardown() {
-  await db.stop();
-  await container.stop();
+export default function dockerDynamodbPlugin(): Plugin {
+  return {
+    name: 'docker-dynamodb:vitest',
+    config(): ViteUserConfig {
+      const config: ViteUserConfig = {
+        test: {
+          globalSetup: [join(__dirname, `global-setup.js`)]
+        }
+      };
+      return config;
+    }
+  };
 }
