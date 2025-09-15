@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { resolve } from 'node:path';
+import importSync from 'import-sync';
 import { NAME } from './constants.ts';
 import type { Config, TableConfig } from './types.ts';
 import { isFunction, randomId } from './utils.ts';
@@ -56,8 +57,8 @@ function readConfig(): Partial<Config> {
   const file = resolve(rootDir, configFile);
 
   try {
-    // As-of node v22 can require() ESM
-    const importedConfig = require(file);
+    // As-of node v22 can require() ESM, but that is not working in the consumer vite environment
+    const importedConfig = importSync.default(file);
     if ('default' in importedConfig) {
       return importedConfig.default;
     }
