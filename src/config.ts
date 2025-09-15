@@ -1,91 +1,22 @@
 import fs from 'node:fs';
 import { resolve } from 'node:path';
-import importSync from 'import-sync';
 import { NAME } from './constants.ts';
-import type { Config, TableConfig } from './types.ts';
+import type {
+  PluginConfig,
+  TableConfig,
+  TableConfigFunction
+} from './types.ts';
 import { isFunction, randomId } from './utils.ts';
 
-const CONFIG_FILE_NAME = `${NAME}.js`;
-const CONFIG_FILE_NAME_CJS = `${NAME}.cjs`;
-const CONFIG_FILE_NAME_MJS = `${NAME}.mjs`;
-const CONFIG_FILE_NAME_JSON = `${NAME}.json`;
-const CONFIG_FILE_NAMES = [
-  CONFIG_FILE_NAME,
-  CONFIG_FILE_NAME_CJS,
-  CONFIG_FILE_NAME_MJS,
-  CONFIG_FILE_NAME_JSON
-] as const;
+let configCache: PluginConfig | undefined;
 
-type ConfigFileName = (typeof CONFIG_FILE_NAMES)[number];
-
-export class NotFoundError extends Error {
-  constructor(dir: string) {
-    super(
-      `Could not find '${CONFIG_FILE_NAME}', '${CONFIG_FILE_NAME_CJS}', '${CONFIG_FILE_NAME_MJS}' or '${CONFIG_FILE_NAME_JSON}' in dir ${dir}`
-    );
-  }
-}
-
-function findConfigOrError(directory: string): ConfigFileName {
-  const foundFile = CONFIG_FILE_NAMES.find((config) => {
-    const file = resolve(directory, config);
-    return fs.existsSync(file);
-  });
-
-  if (!foundFile) {
-    throw new NotFoundError(resolve(directory));
-  }
-
-  return foundFile;
-}
-
-function readConfig(): Partial<Config> {
-  const rootDir = process.cwd();
-  let configFile: string;
-
-  try {
-    configFile = findConfigOrError(rootDir);
-  } catch (e) {
-    if (e instanceof NotFoundError) {
-      // This is fine, we can continue with defaults
-      return {};
-    }
-
-    throw e;
-  }
-
-  const file = resolve(rootDir, configFile);
-
-  try {
-    // As-of node v22 can require() ESM, but that is not working in the consumer vite environment
-    const importedConfig = importSync.default(file);
-    if ('default' in importedConfig) {
-      return importedConfig.default;
-    }
-    return importedConfig;
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(
-        `Something went wrong reading your ${configFile}: ${e.message}, ${e.stack}`
-      );
-    }
-    throw new Error(`Something went wrong reading your ${configFile}: ${e}`);
-  }
-}
-
-let configCache: Config | undefined;
-
-export function getConfig(): Config {
-  if (configCache) {
-    return configCache;
-  }
-
+export function loadConfig(options: Partial<PluginConfig>): PluginConfig {
   const {
     dynamodb,
     config,
     configFile = 'docker-compose.yml',
     projectName = `${NAME}-${randomId()}`
-  } = readConfig();
+  } = options;
 
   if (dynamodb) {
     if (dynamodb.basePort === undefined) {
@@ -117,6 +48,14 @@ export function getConfig(): Config {
   return configCache;
 }
 
+export function getConfig(): PluginConfig {
+  if (!configCache) {
+    throw new TypeError(`Config not loaded`);
+  }
+
+  return configCache;
+}
+
 // Cache the tables result from the config function, so that we
 // are not calling it over and over
 let tablesCache: TableConfig[] | undefined;
@@ -128,15 +67,27 @@ export async function getTables(): Promise<TableConfig[]> {
 
   const { dynamodb } = getConfig();
 
-  if (!dynamodb) {
+  if (!dynamodb?.tables) {
     tablesCache = [];
     return tablesCache;
   }
 
-  if (isFunction(dynamodb.tables)) {
-    tablesCache = await dynamodb.tables();
+  let tables: TableConfig[] | TableConfigFunction | undefined;
+
+  if (typeof dynamodb.tables === 'string') {
+    // a path to a file to load for table definitions
+    const importedTables = await import(
+      resolve(process.cwd(), dynamodb.tables)
+    );
+    tables = importedTables.default ?? importedTables;
   } else {
-    tablesCache = dynamodb.tables ?? [];
+    tables = dynamodb.tables;
+  }
+
+  if (isFunction(tables)) {
+    tablesCache = await tables();
+  } else {
+    tablesCache = tables ?? [];
   }
 
   if (!Array.isArray(tablesCache)) {

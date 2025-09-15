@@ -5,12 +5,14 @@ export type TableConfig = CreateTableInput & {
   TableName: string;
 };
 
+export type TableConfigFunction = () => TableConfig[] | Promise<TableConfig[]>;
+
 export type DynamoDBConfig = {
   basePort: number;
-  tables?: TableConfig[] | (() => TableConfig[] | Promise<TableConfig[]>);
+  tables?: string | TableConfig[] | TableConfigFunction;
 };
 
-export type Config = {
+export type PluginConfig = {
   config?: Record<string, unknown>;
   configFile: string;
   projectName: string;

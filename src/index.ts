@@ -1,19 +1,23 @@
 import { join } from 'node:path';
-import type { Plugin } from 'vite';
-import type { ViteUserConfig } from 'vitest/config.js';
+import type { Vite, VitestPluginContext } from 'vitest/node';
+import { loadConfig } from './config.ts';
+import type { PluginConfig } from './types.ts';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-export default function dockerDynamodbPlugin(): Plugin {
+export default function plugin(
+  options: Partial<PluginConfig> = {}
+): Vite.Plugin {
+  loadConfig(options);
+
   return {
-    name: 'docker-dynamodb:vitest',
-    config(): ViteUserConfig {
-      const config: ViteUserConfig = {
-        test: {
-          globalSetup: [join(__dirname, `global-setup.js`)]
-        }
-      };
-      return config;
+    name: 'vitest:docker-dynamodb',
+    configureVitest(context: VitestPluginContext) {
+      const globalSetup = join(__dirname, `global-setup.js`);
+      context.vitest.config.globalSetup =
+        typeof context.vitest.config.globalSetup === 'string'
+          ? [context.vitest.config.globalSetup, globalSetup]
+          : [...context.vitest.config.globalSetup, globalSetup];
     }
   };
 }
