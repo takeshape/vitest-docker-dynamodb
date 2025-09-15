@@ -65,7 +65,9 @@ export async function getTables(): Promise<TableConfig[]> {
     return tablesCache;
   }
 
-  const { dynamodb } = getConfig();
+  const config = getConfig();
+
+  const { dynamodb } = config;
 
   if (!dynamodb?.tables) {
     tablesCache = [];
@@ -85,7 +87,7 @@ export async function getTables(): Promise<TableConfig[]> {
   }
 
   if (isFunction(tables)) {
-    tablesCache = await tables();
+    tablesCache = (await tables(config)) as TableConfig[];
   } else {
     tablesCache = tables ?? [];
   }

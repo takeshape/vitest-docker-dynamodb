@@ -1,5 +1,8 @@
-export const isFunction = <F>(f: unknown | (() => F)): f is () => F =>
-  !!f && typeof f === 'function';
+import type { PluginConfig } from './types.ts';
+
+export const isFunction = <F>(
+  f: unknown | ((config: PluginConfig) => F)
+): f is (config: PluginConfig) => F => !!f && typeof f === 'function';
 
 const convertToNumbers = (
   keys: Array<string | number | symbol>,
