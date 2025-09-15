@@ -1,6 +1,6 @@
 {
   "name": "@takeshape/vitest-docker-dynamodb",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Bootstrap vitest tests with docker-compose and dynamodb.",
   "keywords": [
     "vitest",
