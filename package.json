@@ -45,9 +45,10 @@
   },
   "packageManager": "npm@10.9.3",
   "scripts": {
-    "build": "npm run clean && tsc",
-    "clean": "del-cli dist",
+    "build": "tsc",
+    "clean": "del-cli dist *.tsbuildinfo",
     "test": "biome check --error-on-warnings && tsc --noEmit",
+    "prepare": "npm run build",
     "release": "npm run test && npm run build && np --no-tests --no-publish"
   },
   "engines": {
