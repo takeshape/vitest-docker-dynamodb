@@ -10,11 +10,12 @@ export async function start(): Promise<void> {
       dynamodb: dynamodbConfig,
       configFile,
       config,
-      projectName
+      projectName,
+      cwd
     } = getConfig();
 
     launchedConfig = {
-      cwd: process.cwd(),
+      cwd,
       config: configFile,
       configAsString: JSON.stringify(config),
       composeOptions: ['--project-name', projectName]

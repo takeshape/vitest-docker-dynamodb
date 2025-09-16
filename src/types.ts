@@ -1,4 +1,5 @@
 import type { CreateTableInput } from '@aws-sdk/client-dynamodb';
+import type { IDockerComposeOptions } from 'docker-compose';
 
 export type TableConfig = CreateTableInput & {
   data?: Record<string, unknown>[];
@@ -19,4 +20,8 @@ export type PluginConfig = {
   configFile: string;
   projectName: string;
   dynamodb?: DynamoDBConfig;
-};
+  cwd: string;
+} & Pick<
+  IDockerComposeOptions,
+  'executable' | 'log' | 'composeOptions' | 'commandOptions' | 'env'
+>;

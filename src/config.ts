@@ -15,7 +15,9 @@ export function loadConfig(options: Partial<PluginConfig>): PluginConfig {
     dynamodb,
     config,
     configFile = 'docker-compose.yml',
-    projectName = `${NAME}-${randomId()}`
+    projectName = `${NAME}-${randomId()}`,
+    cwd = process.cwd(),
+    ...dockerComposeOptions
   } = options;
 
   if (dynamodb) {
@@ -32,7 +34,7 @@ export function loadConfig(options: Partial<PluginConfig>): PluginConfig {
     }
   }
 
-  if (!config && !fs.existsSync(resolve(process.cwd(), configFile))) {
+  if (!config && !fs.existsSync(resolve(cwd, configFile))) {
     throw new TypeError(
       `Option "configFile" must be exist or "config" must be specified.`
     );
@@ -42,7 +44,9 @@ export function loadConfig(options: Partial<PluginConfig>): PluginConfig {
     dynamodb,
     config,
     configFile,
-    projectName
+    projectName,
+    cwd,
+    ...dockerComposeOptions
   };
 
   return configCache;
@@ -67,7 +71,7 @@ export async function getTables(): Promise<TableConfig[]> {
 
   const config = getConfig();
 
-  const { dynamodb } = config;
+  const { dynamodb, cwd } = config;
 
   if (!dynamodb?.tables) {
     tablesCache = [];
@@ -78,9 +82,7 @@ export async function getTables(): Promise<TableConfig[]> {
 
   if (typeof dynamodb.tables === 'string') {
     // a path to a file to load for table definitions
-    const importedTables = await import(
-      resolve(process.cwd(), dynamodb.tables)
-    );
+    const importedTables = await import(resolve(cwd, dynamodb.tables));
     tables = importedTables.default ?? importedTables;
   } else {
     tables = dynamodb.tables;
