@@ -16,8 +16,8 @@ export default function plugin(
       const globalSetup = join(__dirname, `global-setup.js`);
       context.vitest.config.globalSetup =
         typeof context.vitest.config.globalSetup === 'string'
-          ? [context.vitest.config.globalSetup, globalSetup]
-          : [...context.vitest.config.globalSetup, globalSetup];
+          ? [globalSetup, context.vitest.config.globalSetup]
+          : [globalSetup, ...context.vitest.config.globalSetup];
     }
   };
 }
