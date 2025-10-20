@@ -16,10 +16,11 @@ export default function plugin(
     configureVitest(context: VitestPluginContext) {
       const globalSetup = join(__dirname, `global-setup.js`);
       const location = options.setupLocation ?? 'vitest';
-      context[location].config.globalSetup =
-        typeof context.vitest.config.globalSetup === 'string'
-          ? [context.vitest.config.globalSetup, globalSetup]
-          : [...context.vitest.config.globalSetup, globalSetup];
+      const cx = context[location];
+      cx.config.globalSetup =
+        typeof cx.config.globalSetup === 'string'
+          ? [cx.config.globalSetup, globalSetup]
+          : [...cx.config.globalSetup, globalSetup];
     }
   };
 }
