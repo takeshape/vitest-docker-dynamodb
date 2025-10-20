@@ -25,3 +25,10 @@ export type PluginConfig = {
   IDockerComposeOptions,
   'executable' | 'log' | 'composeOptions' | 'commandOptions' | 'env'
 >;
+
+export type PluginOptions = PluginConfig & {
+  /**
+   * Inject global setup into which context?
+   */
+  setupLocation: 'vitest' | 'project';
+};
