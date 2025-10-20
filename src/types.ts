@@ -29,6 +29,14 @@ export type PluginConfig = {
 export type PluginOptions = PluginConfig & {
   /**
    * Inject global setup into which context?
+   *
+   * @default 'vitest'
    */
   setupLocation: 'vitest' | 'project';
+  /**
+   * Should this plugin run before or after other global-setups?
+   *
+   * @default 'after'
+   */
+  setupOrder: 'before' | 'after';
 };

@@ -17,10 +17,17 @@ export default function plugin(
       const globalSetup = join(__dirname, `global-setup.js`);
       const location = options.setupLocation ?? 'vitest';
       const cx = context[location];
+
       cx.config.globalSetup =
         typeof cx.config.globalSetup === 'string'
-          ? [cx.config.globalSetup, globalSetup]
-          : [...cx.config.globalSetup, globalSetup];
+          ? [cx.config.globalSetup]
+          : [...cx.config.globalSetup];
+
+      if (options.setupOrder === 'before') {
+        cx.config.globalSetup.unshift(globalSetup);
+      } else {
+        cx.config.globalSetup.push(globalSetup);
+      }
     }
   };
 }
