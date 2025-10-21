@@ -5,6 +5,10 @@ on:
     types:
       - published
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     name: Publish
@@ -17,8 +21,11 @@ jobs:
           node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
 
+      # Ensure npm 11.5.1 or later is installed for OIDC
+      - name: Update npm
+        shell: bash
+        run: npm install -g npm@latest
+
       - run: npm ci
 
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

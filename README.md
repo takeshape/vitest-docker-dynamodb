@@ -142,3 +142,7 @@ Check out the code [here](./src/set-environment-variables.ts).
 
 This project is deeply indebted to [vitest-dynamodb-local](https://github.com/dgadelha/vitest-dynamodb-local/tree/main/packages/vitest-dynamodb-local#readme). You'll see a lot of similarity in the code and
 process, but swapping in `docker-compose` for `dynamo-db-local`.
+
+## Test
+
+This is a test.
