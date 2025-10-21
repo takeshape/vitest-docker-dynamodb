@@ -13,7 +13,10 @@
     "fixtures"
   ],
   "homepage": "https://github.com/takeshape/vitest-docker-dynamodb",
-  "repository": "github:takeshape/vitest-docker-dynamodb",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takeshape/vitest-docker-dynamodb.git"
+  },
   "license": "MIT",
   "type": "module",
   "files": [

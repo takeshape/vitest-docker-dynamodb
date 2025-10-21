@@ -145,4 +145,4 @@ process, but swapping in `docker-compose` for `dynamo-db-local`.
 
 ## Test
 
-This is a test.
+This is a test
